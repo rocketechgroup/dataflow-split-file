@@ -1,0 +1,21 @@
+{
+  "name": "Streaming beam Python flex template",
+  "description": "Streaming beam example for python flex template.",
+  "parameters": [
+    {
+      "name": "input",
+      "label": "Input GCS files location",
+      "helpText": "gs://[]/[]"
+    },
+    {
+      "name": "output",
+      "label": "Output GCS files location",
+      "helpText": "gs://[]/[]"
+    },
+    {
+      "name": "schema_identifiers",
+      "label": "Information to be used to identify a schema from a line of json",
+      "helpText": "Format: [unique field name]|[partition key 2]^[unique field name 2]|[partition key 2]^..."
+    }
+  ]
+}
