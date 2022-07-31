@@ -1,11 +1,11 @@
 import argparse
+import json
 import logging
 
 import apache_beam as beam
-from apache_beam.io import ReadFromText
-from apache_beam.io import WriteToText
-from apache_beam.options.pipeline_options import PipelineOptions
-from apache_beam.options.pipeline_options import SetupOptions
+from apache_beam.io import ReadFromText, WriteToText
+from apache_beam.options.pipeline_options import PipelineOptions, SetupOptions
+from apache_beam.io.gcp.bigquery import WriteToBigQuery, BigQueryDisposition
 
 message_types = []
 
@@ -37,18 +37,19 @@ def run(argv=None, save_main_session=True):
         dest='input',
         required=True,
         help='Input file to process.')
+
     parser.add_argument(
         '--schema_identifiers',
         dest='schema_identifiers',
         required=True,
         help='Schema identifiers using a unique column belongs to a schema. '
              'Format: [unique field name]|[partition key 2]^[unique field name 2]|[partition key 2]^...')
+
     parser.add_argument(
-        '--output',
-        dest='output',
+        '--output_bigquery_dataset',
+        dest='output_bigquery_dataset',
         required=True,
-        default='/tmp/beam-output/',
-        help='Output file to write results to.')
+        help='Output BigQuery ProjectId:DatasetId')
     known_args, pipeline_args = parser.parse_known_args(argv)
 
     for schema_identifier in known_args.schema_identifiers.split('^'):
@@ -66,10 +67,15 @@ def run(argv=None, save_main_session=True):
                 pipeline
                 | 'Reading Mixed JSONL' >> ReadFromText(known_args.input)
                 | 'Filter by know message types' >> beam.Filter(filter_by_known_message_types)
+                | 'Convert to dict' >> beam.Map(lambda x: json.loads(x))
                 | 'Partition by message type' >> beam.Partition(partition_by_message_type, len(message_types))
         )
         for index, messages in enumerate(partitioned_messages):
-            messages | f'{index}' >> WriteToText(f"{known_args.output}/{message_types[index]['partition_key']}")
+            messages | f'{index}' >> WriteToBigQuery(
+                table=f"{known_args.output_bigquery_dataset}.{message_types[index]['partition_key']}",
+                write_disposition=BigQueryDisposition.WRITE_APPEND,
+                create_disposition=BigQueryDisposition.CREATE_NEVER
+            )
 
 
 if __name__ == '__main__':

@@ -8,9 +8,9 @@
       "helpText": "gs://[]/[]"
     },
     {
-      "name": "output",
-      "label": "Output GCS files location",
-      "helpText": "gs://[]/[]"
+      "name": "output_bigquery_dataset",
+      "label": "Output BigQuery Dataset",
+      "helpText": "ProjectId:DatasetId"
     },
     {
       "name": "schema_identifiers",

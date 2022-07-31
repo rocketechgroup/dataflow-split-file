@@ -5,17 +5,24 @@ Split files by context using partition based pattern matching
 ## Run locally
 
 ```
-pip install -r requirements.txt
-export INPUT=gs://rocketech-de-pgcp-sandbox-temp/dataflow-mixed-structure/
-export OUTPUT=/tmp/beam-output/
-export SCHEMA_IDENTIFIERS="gameNumber|baseball_schedules^station_id|austin_bikeshare_bikeshare_stations^complaint_description|austin_311_311_service_requests"
+pip install -r requirements-launcher.txt
 
-python main.py --input ${INPUT} --output ${OUTPUT} --schema_identifiers ${SCHEMA_IDENTIFIERS}
+export INPUT=gs://rocketech-de-pgcp-sandbox-temp/dataflow-mixed-structure/
+export OUTPUT_BIGQUERY_DATASET=rocketech-de-pgcp-sandbox:ingestion
+export SCHEMA_IDENTIFIERS="gameNumber|baseball_schedules^station_id|austin_bikeshare_bikeshare_stations^complaint_description|austin_311_311_service_requests"
+export GCS_TEMP_LOCATION=gs://rocketech-de-pgcp-sandbox-temp/temp
+
+python main.py --runner direct --temp_location ${GCS_TEMP_LOCATION} --input ${INPUT} --output_bigquery_dataset ${OUTPUT_BIGQUERY_DATASET} --schema_identifiers ${SCHEMA_IDENTIFIERS}
 ```
 
 ## Package as Dataflow Flex template
 
 ### Build docker image and push to Artifact Registry
+
+Permissions required
+- Storage Admin (roles/storage.admin)
+- Cloud Build Editor (roles/cloudbuild.builds.editor)
+- Artifact Registry Repo Admin (roles/artifactregistry.repoAdmin)
 
 ```
 export REGION=europe-west2
@@ -38,6 +45,10 @@ gcloud dataflow flex-template build "gs://rocketech-de-pgcp-sandbox-temp/demo/da
 ```
 
 ## Run the Flex template
+Permissions required
+- Storage Object Admin (roles/storage.objectAdmin)
+- Viewer (roles/viewer)
+- Dataflow Worker (roles/dataflow.worker)
 
 ```
 export DATETIME=`date +%Y%m%d-%H%M%S`
@@ -49,7 +60,7 @@ export SERVICE_ACCOUNT=dataflow@rocketech-de-pgcp-sandbox.iam.gserviceaccount.co
 gcloud dataflow flex-template run "dataflow-split-file-${DATETIME}" \
     --template-file-gcs-location "gs://${BUCKET_NAME}/demo/dataflow/templates/dataflow-split-file.json" \
     --parameters input="${INPUT}" \
-    --parameters output="gs://rocketech-de-pgcp-sandbox-temp/dataflow-output/${DATETIME}" \
+    --parameters output_bigquery_dataset="${OUTPUT_BIGQUERY_DATASET}" \
     --parameters schema_identifiers="${SCHEMA_IDENTIFIERS}" \
     --region "${REGION}" \
     --network "${NETWORK}" \
