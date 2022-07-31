@@ -69,7 +69,7 @@ def run(argv=None, save_main_session=True):
                 | 'Partition by message type' >> beam.Partition(partition_by_message_type, len(message_types))
         )
         for index, messages in enumerate(partitioned_messages):
-            messages | f'{index}' >> WriteToText(f"{known_args.output}_{message_types[index]['partition_key']}")
+            messages | f'{index}' >> WriteToText(f"{known_args.output}/{message_types[index]['partition_key']}")
 
 
 if __name__ == '__main__':
