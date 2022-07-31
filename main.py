@@ -3,7 +3,7 @@ import json
 import logging
 
 import apache_beam as beam
-from apache_beam.io import ReadFromText, WriteToText
+from apache_beam.io import ReadFromText
 from apache_beam.options.pipeline_options import PipelineOptions, SetupOptions
 from apache_beam.io.gcp.bigquery import WriteToBigQuery, BigQueryDisposition
 
@@ -50,6 +50,7 @@ def run(argv=None, save_main_session=True):
         dest='output_bigquery_dataset',
         required=True,
         help='Output BigQuery ProjectId:DatasetId')
+
     known_args, pipeline_args = parser.parse_known_args(argv)
 
     for schema_identifier in known_args.schema_identifiers.split('^'):
