@@ -20,6 +20,7 @@ python main.py --runner direct --temp_location ${GCS_TEMP_LOCATION} --input ${IN
 ### Build docker image and push to Artifact Registry
 
 Permissions required
+
 - Storage Admin (roles/storage.admin)
 - Cloud Build Editor (roles/cloudbuild.builds.editor)
 - Artifact Registry Repo Admin (roles/artifactregistry.repoAdmin)
@@ -45,10 +46,14 @@ gcloud dataflow flex-template build "gs://rocketech-de-pgcp-sandbox-temp/demo/da
 ```
 
 ## Run the Flex template
+
 Permissions required
+
 - Storage Object Admin (roles/storage.objectAdmin)
 - Viewer (roles/viewer)
 - Dataflow Worker (roles/dataflow.worker)
+- BigQuery Data Editor (roles/bigquery.dataEditor)
+- BigQuery Job User (roles/bigquery.jobUser)
 
 ```
 export DATETIME=`date +%Y%m%d-%H%M%S`
