@@ -4,10 +4,8 @@ Split files by context using partition based pattern matching
 
 ## Run locally
 
-> Note that requirements.txt does not contain anything because the dataflow base docker image already has apache-beam
-
 ```
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 export INPUT=gs://rocketech-de-pgcp-sandbox-temp/dataflow-mixed-structure/
 export OUTPUT=/tmp/beam-output/
 export SCHEMA_IDENTIFIERS="gameNumber|baseball_schedules^station_id|austin_bikeshare_bikeshare_stations^complaint_description|austin_311_311_service_requests"
@@ -22,11 +20,10 @@ python main.py --input ${INPUT} --output ${OUTPUT} --schema_identifiers ${SCHEMA
 ```
 export REGION=europe-west2
 export PROJECT_ID=rocketech-de-pgcp-sandbox
-export AF_REPOSITORY=demo
 
 gcloud auth configure-docker ${REGION}-docker.pkg.dev
 
-gcloud builds submit --tag ${REGION}-docker.pkg.dev/${PROJECT_ID}/${AF_REPOSITORY}/dataflow/dataflow-split-file:latest .
+gcloud builds submit --machine-type=e2-highcpu-8 --tag ${REGION}-docker.pkg.dev/${PROJECT_ID}/${AF_REPOSITORY}/dataflow/dataflow-split-file:latest .
 ```
 
 ### Create Flex template
@@ -57,6 +54,7 @@ gcloud dataflow flex-template run "dataflow-split-file-${DATETIME}" \
     --region "${REGION}" \
     --network "${NETWORK}" \
     --subnetwork "${SUBNETWORK}" \
+    --worker-machine-type "e2-standard-4" \
     --disable-public-ips \
     --temp-location "gs://${BUCKET_NAME}/temp" \
     --staging-location "gs://${BUCKET_NAME}/staging" \

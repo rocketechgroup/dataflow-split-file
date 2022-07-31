@@ -61,7 +61,7 @@ def run(argv=None, save_main_session=True):
     pipeline_options.view_as(SetupOptions).save_main_session = save_main_session
 
     # The pipeline will be run on exiting the with block.
-    with beam.Pipeline() as pipeline:
+    with beam.Pipeline(options=pipeline_options) as pipeline:
         partitioned_messages = (
                 pipeline
                 | 'Reading Mixed JSONL' >> ReadFromText(known_args.input)
